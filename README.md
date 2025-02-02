@@ -1,3 +1,2 @@
-The SILInspector is a companion application to the
-"Swift 2 Under the Hood" presentation by Alex Blewitt.
-
+SwiftUI port of https://github.com/alblue/SILInspector
+Available from macOS 13.0 onwards
