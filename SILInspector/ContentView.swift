@@ -12,12 +12,15 @@ struct ContentView: View {
             MacEditorTextView(text: $viewModel.source, font: .systemFont(ofSize: fontSize))
                 .tabItem { Text("Source code") }
                 .tag(Tab.code)
+            buildView(for: $viewModel.parseOutput)
+                .tabItem { Text("Parse") }
+                .tag(Tab.parse)
             buildView(for: $viewModel.astOutput)
                 .tabItem { Text("AST") }
                 .tag(Tab.ast)
-            buildView(for: $viewModel.parseOutput)
-                .tabItem { Text("Parsed AST") }
-                .tag(Tab.parse)
+            buildView(for: $viewModel.prettyPrintAST)
+                .tabItem { Text("Pre-SIL Swift from AST") }
+                .tag(Tab.prettyPrintAST)
             buildView(for: $viewModel.silOutput)
                 .tabItem { Text("Raw SIL") }
                 .tag(Tab.sil)
@@ -70,7 +73,7 @@ struct ContentView: View {
 
 extension ContentView {
     enum Tab: String {
-        case code, ast, parse, sil, canonicalSil, ir, assembly
+        case code, ast, prettyPrintAST, parse, sil, canonicalSil, ir, assembly
     }
     final class ViewModel: ObservableObject {
         private var cancellables = [AnyCancellable]()
@@ -86,6 +89,7 @@ extension ContentView {
         @Published var canonicalSilOutput: String = ""
         @Published var irOutput: String = ""
         @Published var parseOutput: String = ""
+        @Published var prettyPrintAST: String = ""
         @Published var astOutput: String = ""
         @Published var assmeblyOutput: String = ""
 
@@ -147,11 +151,11 @@ extension ContentView {
                 commandRun = command
                 irOutput = runProgram(command)
             case .ast:
-                let command = String(format: programTemplate, "swiftc - -dump-ast")
+                let command = "swiftc - -dump-ast"
                 commandRun = command
                 astOutput = runProgram(command)
             case .parse:
-                let command = String(format: programTemplate, "swiftc - -dump-parse")
+                let command = "swiftc - -dump-parse"
                 commandRun = command
                 parseOutput = runProgram(command)
             case .canonicalSil:
@@ -162,6 +166,10 @@ extension ContentView {
                 let command = String(format: programTemplate, "swiftc - -emit-assembly")
                 commandRun = command
                 assmeblyOutput = runProgram(command)
+            case .prettyPrintAST:
+                let command = "swiftc - -print-ast"
+                commandRun = command
+                prettyPrintAST = runProgram(command)
             case .code:
                 break
             }

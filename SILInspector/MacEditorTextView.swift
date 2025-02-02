@@ -5,10 +5,6 @@ struct MacEditorTextView: NSViewRepresentable {
     @Binding var text: String
     var font: NSFont? = .systemFont(ofSize: 14, weight: .regular)
 
-    var onEditingChanged: () -> Void = {}
-    var onCommit: () -> Void = {}
-    var onTextChange: (String) -> Void = { _ in }
-
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -30,37 +26,16 @@ extension MacEditorTextView {
 
     class Coordinator: NSObject, NSTextViewDelegate {
         var parent: MacEditorTextView
-        var selectedRanges: [NSValue] = []
 
         init(_ parent: MacEditorTextView) {
             self.parent = parent
-        }
-
-        func textDidBeginEditing(_ notification: Notification) {
-            guard let textView = notification.object as? NSTextView else {
-                return
-            }
-
-            self.parent.text = textView.string
-            self.parent.onEditingChanged()
         }
 
         func textDidChange(_ notification: Notification) {
             guard let textView = notification.object as? NSTextView else {
                 return
             }
-
             self.parent.text = textView.string
-            self.selectedRanges = textView.selectedRanges
-        }
-
-        func textDidEndEditing(_ notification: Notification) {
-            guard let textView = notification.object as? NSTextView else {
-                return
-            }
-
-            self.parent.text = textView.string
-            self.parent.onCommit()
         }
     }
 }
