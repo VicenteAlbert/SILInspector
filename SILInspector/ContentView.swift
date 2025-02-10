@@ -1,6 +1,15 @@
 import Combine
 import SwiftUI
 
+// HACK to work-around the smart quote issue
+extension NSTextView {
+    open override var frame: CGRect {
+        didSet {
+            self.isAutomaticQuoteSubstitutionEnabled = false
+        }
+    }
+}
+
 struct ContentView: View {
 
     @StateObject private var viewModel = ViewModel()
@@ -9,7 +18,8 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $viewModel.selectedTab) {
-            MacEditorTextView(text: $viewModel.source, font: .systemFont(ofSize: fontSize))
+            TextEditor(text: $viewModel.source)
+                .font(.system(size: fontSize))
                 .tabItem { Text("Source code") }
                 .tag(Tab.code)
             buildView(for: $viewModel.parseOutput)
@@ -44,12 +54,10 @@ struct ContentView: View {
             Toggle("Module optimize", isOn: $viewModel.moduleOptimize)
             Toggle("Parse as library", isOn: $viewModel.parseAsLibrary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Picker("Font size", selection: $fontSize) {
-                ForEach(sizes, id: \.self) { size in
-                    Text("\(Int(size))")
-                }
+            HStack {
+                Text("Font size")
+                Slider(value: $fontSize, in: (12...36), step: 1)
             }
-            .frame(width: 150)
         }
     }
 
